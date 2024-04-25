@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Watch Video</title>
+    <link href="https://vjs.zencdn.net/7.11.4/video-js.css" rel="stylesheet" />
+  </head>
+  <body>
+    <h1>Watch Video</h1>
+    <div>
+      <form action="/watch" method="POST">
+        <input
+          type="text"
+          name="videoUrl"
+          placeholder="Enter Video URL"
+          required
+        />
+        <button type="submit">Play</button>
+      </form>
+    </div>
+    <% if (videoUrl) { %>
+    <div>
+      <label for="quality-select">Select Quality:</label>
+      <select id="quality-select" name="quality">
+        <option value="426x240">Low</option>
+        <option value="640x360">Medium</option>
+        <option value="854x480">High</option>
+      </select>
+      <button id="play-button">Play</button>
+    </div>
+    <div id="quality-box"></div>
+    <video
+      id="my-video"
+      class="video-js"
+      controls
+      preload="auto"
+      data-setup='{"html5": {"hlsjsConfig": {"enableWorker": false}}}'
+      style="width: 80vw; height: 80vh"
+    >
+      <source id="video-source" src="" type="application/x-mpegURL" />
+      Your browser does not support the video tag.
+    </video>
+    <script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
+    <script>
+      var videoUrl = "<%= videoUrl %>";
+      var player = videojs("my-video");
+      var qualitySelect = document.getElementById("quality-select");
+      var playButton = document.getElementById("play-button");
+      var qualityBox = document.getElementById("quality-box");
+      function updateVideoSource(selectedQuality) {
+        var videoSource = document.getElementById("video-source");
+        videoSource.src =
+          "/hls/" + videoUrl + "/" + videoUrl + "_" + selectedQuality + ".m3u8";
+        player.src(videoSource.src);
+        player.play();
+      }
+      qualitySelect.addEventListener("change", function () {
+        var selectedQuality = qualitySelect.value;
+        updateVideoSource(selectedQuality);
+      });
+      playButton.addEventListener("click", function () {
+        var selectedQuality = "426x240";
+        updateVideoSource(selectedQuality);
+      });
+      updateVideoSource("426x240");
+      player.one("timeupdate", function () {
+        setTimeout(checkNetworkSpeed, 1000);
+      });
+      function checkNetworkSpeed() {
+        var connection =
+          navigator.connection ||
+          navigator.mozConnection ||
+          navigator.webkitConnection;
+        var speedMbps = connection.downlink;
+        var selectedQuality;
+        if (speedMbps >= 5) {
+          selectedQuality = "854x480";
+        } else if (speedMbps >= 2) {
+          selectedQuality = "640x360";
+        } else {
+          selectedQuality = "426x240";
+        }
+        qualitySelect.value = selectedQuality;
+        updateVideoSource(selectedQuality);
+        qualityBox.innerHTML = "Current Quality: " + selectedQuality;
+      }
+    </script>
+    <% } %>
+  </body>
+</html>

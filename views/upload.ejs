@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Upload Video</title>
+  </head>
+  <body>
+    <h1>Upload Video</h1>
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+      <input
+        type="text"
+        name="title"
+        placeholder="Title"
+        required
+      /><br /><br />
+      <input
+        type="text"
+        name="description"
+        placeholder="Description"
+      /><br /><br />
+      <input type="file" name="video" accept="video/*" required /><br /><br />
+      <button type="submit">Upload</button>
+    </form>
+
+    <% if (videoUrl) { %>
+    <h2>Convert to HLS</h2>
+    <form action="/convertToHLS" method="POST">
+      <input type="hidden" name="videoUrl" value="<%= videoUrl %>" />
+      <button type="submit">Convert to HLS</button>
+    </form>
+    <% } %>
+  </body>
+</html>
